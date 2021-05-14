@@ -1,0 +1,20 @@
+{
+    "countries":[
+        {
+
+            "id":1,
+            "countryName":"Afganistan"
+        },
+        {
+            "id":2,
+            "countryName":"IRAW"
+
+        },
+        {
+            "id":3,
+            "countryName":"Philipphines"
+
+        }
+      
+    ] 
+}
