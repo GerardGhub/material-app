@@ -3,17 +3,25 @@
 <form [formGroup]="formGroup">
 <!-- <input hideRequiredMarker   -->
 <mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> <!-- Float Label auto  never always-->
-<input type="email" matInput placeholder="Enter Customer Name" formControlName="email"> 
+<input type="email" matInput placeholder="Enter Customer Name" formControlName="email" [errorStateMatcher]="customErrorStateMatcher"> 
 <mat-label>Email</mat-label>
 <mat-hint align="end">up to 30 Characters</mat-hint> <!-- start end for mat hint--> <!--apperacne: legacy | standard | fill | outline-->
 <mat-icon matPrefix>email</mat-icon>
+<mat-error *ngIf="getFormControl('email').hasError('required')" [innerHTML]="getErrorMessage('email', 'required')"></mat-error>
+
+<mat-error *ngIf="getFormControl('email').hasError('email')" [innerHTML]="getErrorMessage('email', 'email')"></mat-error>
 </mat-form-field>
 
 <mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> <!-- Float Label auto  never always-->
-    <input type="text" matInput placeholder="Enter Customer Name" formControlName="customerName"> 
+    <input type="text" matInput placeholder="Enter Customer Name" formControlName="customerName" [errorStateMatcher]="customErrorStateMatcher"> 
     <mat-label>Customer Name</mat-label>
     <mat-hint align="end">up to 30 Characters</mat-hint> <!-- start end for mat hint--> <!--apperacne: legacy | standard | fill | outline-->
     <mat-icon matPrefix>person</mat-icon>
+    <mat-error *ngIf="getFormControl('customerName').hasError('required')" [innerHTML]="getErrorMessage('customerName', 'required')"></mat-error>
+
+    <mat-error *ngIf="getFormControl('customerName').hasError('pattern')" [innerHTML]="getErrorMessage('customerName', 'pattern')"></mat-error>
+
+    <mat-error *ngIf="getFormControl('customerName').hasError('maxlength')" [innerHTML]="getErrorMessage('customerName', 'maxlength')"></mat-error>
 </mat-form-field>
     
 
@@ -43,7 +51,7 @@
 
 
 <mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> 
-    <mat-select formControlName="country"> 
+    <mat-select formControlName="country" > 
         <mat-optgroup label="A">
             <mat-option value="IRAQ">IRAW</mat-option>
             <mat-option value="SAUDI">SAUDI</mat-option>
@@ -56,7 +64,41 @@
     <mat-label>Country</mat-label>
     <mat-hint align="end">Choose a Country</mat-hint> 
     <mat-icon matPrefix>place</mat-icon>
+    <mat-error *ngIf="getFormControl('country').hasError('required')" [innerHTML]="getErrorMessage('country', 'required')"></mat-error>
 </mat-form-field>
+
+
+<mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> <!-- Float Label auto  never always-->
+    <input type="text" matInput placeholder="City" formControlName="city" [matAutocomplete]="citiesAutocomplete"> 
+    <mat-label>City</mat-label>
+    <mat-hint align="end">Choose or type a city</mat-hint> <!-- start end for mat hint--> <!--apperacne: legacy | standard | fill | outline-->
+    <mat-icon matPrefix>explore</mat-icon>
+    <mat-autocomplete #citiesAutocomplete="matAutocomplete">
+        <mat-option *ngFor="let city of cities" [value]="city.cityName">{{city.cityName}}</mat-option>
+        <!-- <mat-option value="tae">takla</mat-option> -->
+    </mat-autocomplete>
+
+</mat-form-field>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- Basic Button -->
 <!-- <div class="mb">
@@ -88,10 +130,10 @@
 </div> -->
 
 <!-- Stroked Buttons -->
-<div class="mb">
-    <button mat-stroked-button color="primary" class="mr">Save</button>
-    <button mat-stroked-button color="accent" class="mr">Cancel</button>
-    <button mat-stroked-button color="warn" class="mr">Delete</button>
+<div class="mb mt">
+    <button mat-stroked-button color="primary" class="mr" type="submit">Save</button>
+    <button mat-stroked-button color="accent" class="mr" type="button">Cancel</button>
+    <button mat-stroked-button color="warn" class="mr" type="button">Delete</button>
 </div>
 <div>
     {{formGroup.value | json}}

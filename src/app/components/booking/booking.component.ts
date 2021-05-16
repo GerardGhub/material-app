@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { CustomErrorStateMatcher } from 'src/app/helpers/customErrorStateMatcher';
 import { CountriesService } from '../../services/countries.service';
 
 @Component({
@@ -12,13 +13,19 @@ export class BookingComponent implements OnInit
   //property
   countries: any;
   formGroup: FormGroup;
+  customErrorStateMatcher:CustomErrorStateMatcher = new CustomErrorStateMatcher();
+  cities: any[]=[
+    {id:1, cityName: "Abu Dhabi"},
+    {id:2, cityName: "Cebu"}
+  ];
 
   constructor(private countriesService: CountriesService)
   {
     this.formGroup = new FormGroup({
       email: new FormControl(null, [Validators.required, Validators.email]),
       customerName: new FormControl(null, [Validators.required, Validators.maxLength(30), Validators.pattern('^[A-Za-z. ]*$')]),
-      country: new FormControl(null, [Validators.required])
+      country: new FormControl(null, [Validators.required]),
+      city: new FormControl(null)
     });
   }
 
