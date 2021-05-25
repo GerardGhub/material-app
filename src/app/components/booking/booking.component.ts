@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CustomErrorStateMatcher } from 'src/app/helpers/customErrorStateMatcher';
+import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { CountriesService } from '../../services/countries.service';
+import { CustomErrorStateMatcher } from "../../helpers/customErrorStateMatcher";
+import { CitiesService } from '../../services/cities.service';
+import { City } from '../../models/City';
+import { debounceTime, tap, switchMap } from "rxjs/operators";
 
 @Component({
   selector: 'app-booking',
@@ -10,27 +13,106 @@ import { CountriesService } from '../../services/countries.service';
 })
 export class BookingComponent implements OnInit
 {
-  //property
+  //properties
   countries: any;
   formGroup: FormGroup;
-  customErrorStateMatcher:CustomErrorStateMatcher = new CustomErrorStateMatcher();
-  cities: any[]=[
-    {id:1, cityName: "Abu Dhabi"},
-    {id:2, cityName: "Cebu"}
+  customErrorStateMatcher: CustomErrorStateMatcher = new CustomErrorStateMatcher();
+  cities: City[] = [];
+  isCitiesLoading: boolean = false;
+
+  //checkbox-group
+  hobbies: any[] = [
+    { id: 1, hobbyName: "Music" },
+    { id: 2, hobbyName: "Food" },
+    { id: 3, hobbyName: "Travel" },
+    { id: 4, hobbyName: "Pets" },
+    { id: 5, hobbyName: "Hiking" },
   ];
 
-  constructor(private countriesService: CountriesService)
+    //date-picker
+    minDate: Date = new Date("1950-01-01");
+    maxDate: Date = new Date("2010-12-31");
+    dateHint: string = "Choose date of birth";
+    startDate: Date = new Date("2002-01-01");
+
+    dateFilter(date)
+    {
+      return date && date.getDay() !== 0 && date.getDay() !== 6;
+    }
+  
+    onDateChange()
+    {
+      if (this.formGroup.value.dateOfBirth)
+      {
+        let date = new Date(this.formGroup.value.dateOfBirth);
+        this.dateHint = `You born on ${date.toString().substr(0, date.toString().indexOf(" "))}`;
+      }
+      else
+      {
+        this.dateHint = "Choose date of birth";
+      }
+    }
+
+  constructor(private countriesService: CountriesService, private citiesService: CitiesService)
   {
     this.formGroup = new FormGroup({
       email: new FormControl(null, [Validators.required, Validators.email]),
       customerName: new FormControl(null, [Validators.required, Validators.maxLength(30), Validators.pattern('^[A-Za-z. ]*$')]),
       country: new FormControl(null, [Validators.required]),
-      city: new FormControl(null)
+      city: new FormControl(null),
+      receiveNewsLetters: new FormControl(null),
+      hobbies: new FormArray([]),
+      allHobbies: new FormControl(false),
+      gender: new FormControl(null, [Validators.required]),
+      dateOfBirth: new FormControl(null)
     });
+
+    //add form controls to form array
+    this.hobbies.forEach(() =>
+    {
+      this.hobbiesFormArray.push(new FormControl(false));
+    });
+  }
+
+  //returns the form array
+  get hobbiesFormArray(): FormArray
+  {
+    return this.formGroup.get("hobbies") as FormArray;
+  }
+
+  //executes when the user clicks on "All" checkbox for hobbies
+  onAllHobbiesCheckBoxChange()
+  {
+    this.hobbiesFormArray.controls.forEach((hobby, index) =>
+    {
+      this.hobbiesFormArray.at(index).patchValue(this.formGroup.value.allHobbies);
+    });
+  }
+
+  //returns true, if all hobby checkboxes are checked
+  allHobbiesSelected()
+  {
+    return this.hobbiesFormArray.value.every(val => val === true); //[true, true, true, true, true]
+  }
+
+  //returns true, if all hobby checkboxes are unchecked
+  noHobbiesSelected()
+  {
+    return this.hobbiesFormArray.value.every(val => val === false); //[false, false, false, false, false]
+  }
+
+  //executes when the user checks / unchecks any hobby checkbox
+  onHobbyChange(i)
+  {
+    if (this.allHobbiesSelected())
+      this.formGroup.patchValue({ allHobbies: true });
+    else
+      this.formGroup.patchValue({ allHobbies: false });
   }
 
   ngOnInit(): void
   {
+    //countries
     this.countriesService.getCountries().subscribe(
       (response) =>
       {
@@ -39,6 +121,32 @@ export class BookingComponent implements OnInit
       (error) =>
       {
         console.log(error);
+      });
+
+    //ngOnInit
+    this.getFormControl("city").valueChanges
+      .pipe(
+
+        //debounceTime: wait for at least 500 milliseconds, after typing in textbox
+        debounceTime(500),
+
+        //tap: do something before making http request
+        tap(() =>
+        {
+          this.cities = [];
+          this.isCitiesLoading = true;
+        }),
+
+        //switchMap
+        switchMap((value) =>
+        {
+          return this.citiesService.getCities(value);
+        })
+      )
+      .subscribe((response) =>
+      {
+        this.cities = response;
+        this.isCitiesLoading = false;
       });
   }
 
@@ -84,6 +192,14 @@ export class BookingComponent implements OnInit
           else
             return "";
         }
+
+        case "gender":
+          {
+            if (errorType === "required")
+              return "Choose gender either Male or Female or Others";
+            else
+              return "";
+          }
 
       default: return "";
     }

@@ -16,5 +16,12 @@
 
         }
       
+    ],
+    "cities":[
+        
+        {"id":1, "cityName": "Abu Dhabi"},
+        {"id":2, "cityName": "Cebu"},
+        {"id":3, "cityName": "Macbakle"}
+
     ] 
 }

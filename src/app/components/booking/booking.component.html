@@ -1,186 +1,124 @@
-
 <h4>New Booking</h4>
 <form [formGroup]="formGroup">
-<!-- <input hideRequiredMarker   -->
-<mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> <!-- Float Label auto  never always-->
-<input type="email" matInput placeholder="Enter Customer Name" formControlName="email" [errorStateMatcher]="customErrorStateMatcher"> 
-<mat-label>Email</mat-label>
-<mat-hint align="end">up to 30 Characters</mat-hint> <!-- start end for mat hint--> <!--apperacne: legacy | standard | fill | outline-->
-<mat-icon matPrefix>email</mat-icon>
-<mat-error *ngIf="getFormControl('email').hasError('required')" [innerHTML]="getErrorMessage('email', 'required')"></mat-error>
 
-<mat-error *ngIf="getFormControl('email').hasError('email')" [innerHTML]="getErrorMessage('email', 'email')"></mat-error>
-</mat-form-field>
+  <div class="flex">
+    <div class="box-1">
 
-<mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> <!-- Float Label auto  never always-->
-    <input type="text" matInput placeholder="Enter Customer Name" formControlName="customerName" [errorStateMatcher]="customErrorStateMatcher"> 
-    <mat-label>Customer Name</mat-label>
-    <mat-hint align="end">up to 30 Characters</mat-hint> <!-- start end for mat hint--> <!--apperacne: legacy | standard | fill | outline-->
-    <mat-icon matPrefix>person</mat-icon>
-    <mat-error *ngIf="getFormControl('customerName').hasError('required')" [innerHTML]="getErrorMessage('customerName', 'required')"></mat-error>
+      <!-- input -->
+      <mat-form-field class="w-100" floatLabel="auto" appearance="standard" color="primary">
+        <input type="email" matInput placeholder="Enter Customer Email" formControlName="email" [errorStateMatcher]="customErrorStateMatcher" />
+        <mat-label>Email</mat-label>
+        <mat-hint align="end">Up to 30 characters</mat-hint>
+        <mat-icon matPrefix>email</mat-icon>
 
-    <mat-error *ngIf="getFormControl('customerName').hasError('pattern')" [innerHTML]="getErrorMessage('customerName', 'pattern')"></mat-error>
+        <mat-error *ngIf="getFormControl('email').hasError('required')" [innerHTML]="getErrorMessage('email', 'required')"></mat-error>
 
-    <mat-error *ngIf="getFormControl('customerName').hasError('maxlength')" [innerHTML]="getErrorMessage('customerName', 'maxlength')"></mat-error>
-</mat-form-field>
-    
+        <mat-error *ngIf="getFormControl('email').hasError('email')" [innerHTML]="getErrorMessage('email', 'email')"></mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w-100" floatLabel="auto" appearance="standard" color="primary">
+        <input type="text" matInput placeholder="Enter Customer Name" formControlName="customerName" [errorStateMatcher]="customErrorStateMatcher" />
+        <mat-label>Customer Name</mat-label>
+        <mat-hint align="end">Up to 30 characters</mat-hint>
+        <mat-icon matPrefix>person</mat-icon>
+
+        <mat-error *ngIf="getFormControl('customerName').hasError('required')" [innerHTML]="getErrorMessage('customerName', 'required')"></mat-error>
+
+        <mat-error *ngIf="getFormControl('customerName').hasError('pattern')" [innerHTML]="getErrorMessage('customerName', 'pattern')"></mat-error>
+
+        <mat-error *ngIf="getFormControl('customerName').hasError('maxlength')" [innerHTML]="getErrorMessage('customerName', 'maxlength')"></mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w-100" floatLabel="auto" appearance="standard" color="primary">
+        <mat-select formControlName="country">
+          <mat-option *ngFor="let country of countries" [value]="country.id">{{country.countryName}}</mat-option>
+        </mat-select>
+        <mat-label>Country</mat-label>
+        <mat-hint align="end">Choose a country</mat-hint>
+        <mat-icon matPrefix>place</mat-icon>
+
+        <mat-error *ngIf="getFormControl('country').hasError('required')" [innerHTML]="getErrorMessage('country', 'required')"></mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w-100" color="primary">
+        <input type="text" matInput placeholder="City" formControlName="city" [matAutocomplete]="citiesAutocomplete" />
+        <mat-label>City</mat-label>
+        <mat-hint align="end">Choose or type a city</mat-hint>
+        <mat-icon matPrefix>explore</mat-icon>
+
+        <mat-autocomplete #citiesAutocomplete="matAutocomplete">
+          <mat-option *ngIf="isCitiesLoading">Loading...</mat-option>
+          <mat-option *ngFor="let city of cities" [value]="city.cityName">{{city.cityName}}</mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <div class="ml mt">
+        <mat-checkbox color="primary" formControlName="receiveNewsLetters">Receive News Letters</mat-checkbox>
+      </div>
+
+      <div class="ml mt mb">
+        <mat-label>Hobbies:</mat-label>
+
+        <div>
+          <mat-checkbox formControlName="allHobbies" (change)="onAllHobbiesCheckBoxChange()" [indeterminate]="!allHobbiesSelected() && !noHobbiesSelected()">All</mat-checkbox>
+        </div>
+
+        <div formArrayName="hobbies">
+          <div *ngFor="let hobby of hobbiesFormArray.controls; let i = index">
+            <mat-checkbox [formControl]="hobby" color="primary" (change)="onHobbyChange(i)">{{hobbies[i].hobbyName}}</mat-checkbox>
+          </div>
+        </div>
+      </div>
+
+      <!-- radio button -->
+      <div class="ml mt mb">
+        <mat-radio-group formControlName="gender">
+          <mat-label class="mr">Gender:</mat-label>
+          <mat-radio-button value="male" class="mr">Male</mat-radio-button>
+          <mat-radio-button value="female" class="mr">Female</mat-radio-button>
+          <mat-radio-button value="others" class="mr">Others</mat-radio-button>
+          <mat-error *ngIf="getFormControl('gender').hasError('required') && getFormControl('gender').touched" [innerHTML]="getErrorMessage('gender', 'required')"></mat-error>
+        </mat-radio-group>
+      </div>
+
+    </div>
+    <!-- end of box 1-->
+
+    <div class="box-2">
+      <!-- date picker -->
+      <mat-form-field class="w-100">
+        <mat-label>Date of Birth:</mat-label>
+        <input type="text" matInput [matDatepicker]="dobDatepicker" formControlName="dateOfBirth" (dateChange)="onDateChange()">
+        <!-- [matDatepickerFilter]="dateFilter"-->
+        <!-- [min]="minDate" [max]="maxDate" -->
+
+        <mat-datepicker-toggle matSuffix [for]="dobDatepicker">
+          <mat-icon matDatepickerToggleIcon>keyboard_arrow_down</mat-icon>
+        </mat-datepicker-toggle>
+
+        <mat-datepicker #dobDatepicker startView="month"></mat-datepicker>
+        <!-- startView: month | year | multi-year -->
+        <!-- [startAt]="startDate" -->
+
+        <!-- touchUi -->
+        <mat-hint align="end">{{dateHint}}</mat-hint>
+        <mat-icon matPrefix>calendar_today</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
 
 
-<!-- select <mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> 
-    <mat-select required="required"> 
-        <mat-option value="'A'">A</mat-option>
-        <mat-option value="'B'">B</mat-option>
-        <mat-option value="'C'">C</mat-option>
-        <mat-option value="'D'">D</mat-option>
-    </mat-select>
-    <mat-label>Country</mat-label>
-    <mat-hint align="end">Choose a Country</mat-hint> 
-    <mat-icon matPrefix>place</mat-icon>
-</mat-form-field> -->
-    
-
-<!-- <mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> 
-    <mat-select required="required"> 
-        <mat-option *ngFor="let country of countries" [value]="country.id">{{country.countryName}}</mat-option>
-
-    </mat-select>
-    <mat-label>Country</mat-label>
-    <mat-hint align="end">Choose a Country</mat-hint> 
-    <mat-icon matPrefix>place</mat-icon>
-</mat-form-field> -->
 
 
-<mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> 
-    <mat-select formControlName="country" > 
-        <mat-optgroup label="A">
-            <mat-option value="IRAQ">IRAW</mat-option>
-            <mat-option value="SAUDI">SAUDI</mat-option>
-        </mat-optgroup>
-        <mat-optgroup label="E">
-            <mat-option value="SAN FERNANDO">SAN FERNANDO</mat-option>
-            <mat-option value="LAGUNDI">LAGUNDI</mat-option>
-        </mat-optgroup>
-    </mat-select>
-    <mat-label>Country</mat-label>
-    <mat-hint align="end">Choose a Country</mat-hint> 
-    <mat-icon matPrefix>place</mat-icon>
-    <mat-error *ngIf="getFormControl('country').hasError('required')" [innerHTML]="getErrorMessage('country', 'required')"></mat-error>
-</mat-form-field>
-
-
-<mat-form-field floatLabel="auto" appearance="standard" color="primary" class="w-100"> <!-- Float Label auto  never always-->
-    <input type="text" matInput placeholder="City" formControlName="city" [matAutocomplete]="citiesAutocomplete"> 
-    <mat-label>City</mat-label>
-    <mat-hint align="end">Choose or type a city</mat-hint> <!-- start end for mat hint--> <!--apperacne: legacy | standard | fill | outline-->
-    <mat-icon matPrefix>explore</mat-icon>
-    <mat-autocomplete #citiesAutocomplete="matAutocomplete">
-        <mat-option *ngFor="let city of cities" [value]="city.cityName">{{city.cityName}}</mat-option>
-        <!-- <mat-option value="tae">takla</mat-option> -->
-    </mat-autocomplete>
-
-</mat-form-field>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- Basic Button -->
-<!-- <div class="mb">
-    <button mat-button>Save</button>
-    <button mat-button>Cancel</button>
-    <button mat-button>Delete</button>
-</div> -->
-
-<!-- Color Variants -->
-<!-- <div class="mb">
-    <button mat-button color="primary" class="mr">Save</button>
-    <button mat-button color="accent" class="mr">Cancel</button>
-    <button mat-button color="warn" class="mr">Delete</button>
-</div>
- -->
-
- <!-- Flat Buttons -->
- <!-- <div class="mb">
-    <button mat-flat-button color="primary" class="mr">Save</button>
-    <button mat-flat-button color="accent" class="mr">Cancel</button>
-    <button mat-flat-button color="warn" class="mr">Delete</button>
-</div> -->
-
-<!-- Raised Buttons -->
-<!-- <div class="mb">
-    <button mat-raised-button color="primary" class="mr">Save</button>
-    <button mat-raised-button color="accent" class="mr">Cancel</button>
-    <button mat-raised-button color="warn" class="mr">Delete</button>
-</div> -->
-
-<!-- Stroked Buttons -->
-<div class="mb mt">
-    <button mat-stroked-button color="primary" class="mr" type="submit">Save</button>
+  <!-- Stroked Buttons -->
+  <div class="mb mt">
+    <button mat-stroked-button color="primary" class="mr">Save</button>
     <button mat-stroked-button color="accent" class="mr" type="button">Cancel</button>
     <button mat-stroked-button color="warn" class="mr" type="button">Delete</button>
-</div>
-<div>
+  </div>
+
+  <div>
     {{formGroup.value | json}}
-</div>
-<!-- Disable Ripple -->
-<!-- <div class="mb">
-    <button mat-stroked-button color="primary" class="mr" disableRipple>Save</button>
-    <button mat-stroked-button color="accent" class="mr" disableRipple>Cancel</button>
-    <button mat-stroked-button color="warn" class="mr" disableRipple>Delete</button>
-</div> -->
+  </div>
 
-<!-- Icon Buttons -->
-<!-- <div class="mb">
-    <button mat-icon-button color="primary" class="mr" >
-        <mat-icon>save</mat-icon>
-    </button>
-    <button mat-icon-button color="accent" class="mr" >
-        <mat-icon>cancel</mat-icon>
-    </button>
-    <button mat-icon-button color="warn" class="mr" >
-        <mat-icon>delete</mat-icon>
-    </button>
-</div> -->
-
-<!-- Fab ICons
-<div class="mb">
-    <button mat-fab color="primary" class="mr" >
-        <mat-icon>save</mat-icon>
-    </button>
-    <button mat-fab color="accent" class="mr" >
-        <mat-icon>cancel</mat-icon>
-    </button>
-    <button mat-fab color="warn" class="mr" >
-        <mat-icon>delete</mat-icon>
-    </button>
-</div> -->
-<!-- 
-<!-- Mini Fab -->
-<!-- <div class="mb">
-    <button mat-mini-fab color="primary" class="mr" >
-        <mat-icon>save</mat-icon>
-    </button>
-    <button mat-mini-fab color="accent" class="mr" >
-        <mat-icon>cancel</mat-icon>
-    </button>
-    <button mat-mini-fab color="warn" class="mr" >
-        <mat-icon>delete</mat-icon> 
-    <!-- </button>
-</div> --> 
 </form>

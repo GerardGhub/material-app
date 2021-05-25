@@ -1,16 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { City } from '../models/city';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CountriesService {
+export class CitiesService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getCountries(): Observable<any>
+  getCities(searchText): Observable<City[]>
   {
-    return this.httpClient.get<any>("http://localhost:7000/countries");
+    return this.httpClient.get<City[]>(`http://localhost:7000/cities?cityName_like=^${searchText}`);
   }
 }
