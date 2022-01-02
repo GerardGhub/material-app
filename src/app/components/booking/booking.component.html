@@ -16,6 +16,7 @@
         <mat-error *ngIf="getFormControl('email').hasError('email')" [innerHTML]="getErrorMessage('email', 'email')"></mat-error>
       </mat-form-field>
 
+      <!-- input -->
       <mat-form-field class="w-100" floatLabel="auto" appearance="standard" color="primary">
         <input type="text" matInput placeholder="Enter Customer Name" formControlName="customerName" [errorStateMatcher]="customErrorStateMatcher" />
         <mat-label>Customer Name</mat-label>
@@ -29,6 +30,8 @@
         <mat-error *ngIf="getFormControl('customerName').hasError('maxlength')" [innerHTML]="getErrorMessage('customerName', 'maxlength')"></mat-error>
       </mat-form-field>
 
+
+      <!-- select -->
       <mat-form-field class="w-100" floatLabel="auto" appearance="standard" color="primary">
         <mat-select formControlName="country">
           <mat-option *ngFor="let country of countries" [value]="country.id">{{country.countryName}}</mat-option>
@@ -40,6 +43,7 @@
         <mat-error *ngIf="getFormControl('country').hasError('required')" [innerHTML]="getErrorMessage('country', 'required')"></mat-error>
       </mat-form-field>
 
+      <!-- auto complete -->
       <mat-form-field class="w-100" color="primary">
         <input type="text" matInput placeholder="City" formControlName="city" [matAutocomplete]="citiesAutocomplete" />
         <mat-label>City</mat-label>
@@ -56,6 +60,9 @@
         <mat-checkbox color="primary" formControlName="receiveNewsLetters">Receive News Letters</mat-checkbox>
       </div>
 
+
+
+      <!-- checkbox -->
       <div class="ml mt mb">
         <mat-label>Hobbies:</mat-label>
 
@@ -104,17 +111,87 @@
         <mat-hint align="end">{{dateHint}}</mat-hint>
         <mat-icon matPrefix>calendar_today</mat-icon>
       </mat-form-field>
+
+      <mat-form-field class="w-100" color="primary">
+        <mat-label>Period of Study:</mat-label>
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate type="text" matInput formControlName="studyPeriodStart" />
+          <input matEndDate type="text" matInput formControlName="studyPeriodEnd" />
+        </mat-date-range-input>
+
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+
+      <!-- chips -->
+      <div class="mb mt">
+        <div>
+          <mat-label>Banks:</mat-label>
+        </div>
+        <mat-chip-list>
+          <mat-chip color="accent" selectable [selected]="All" (click)="AllCountriesClicked()">All Countries</mat-chip>
+
+          <mat-chip color="accent" selectable [selected]="UK" (click)="UKClicked()">UK</mat-chip>
+
+          <mat-chip color="accent" selectable [selected]="USA" (click)="USAClicked()">USA</mat-chip>
+        </mat-chip-list>
+
+        <ul>
+          <li *ngFor="let bank of banks">{{bank.bankName}}, &nbsp;<small class="grey">{{bank.countryName}}</small></li>
+        </ul>
+      </div>
+
     </div>
   </div>
 
 
+  <!-- button toggle -->
+  <div class="mb mt">
+    <mat-label>Expertise Level:</mat-label>
+    <mat-button-toggle-group formControlName="expertiseLevel">
+      <mat-button-toggle value="Beginner">Beginner</mat-button-toggle>
+      <mat-button-toggle value="Intermediate">Intermediate</mat-button-toggle>
+      <mat-button-toggle value="Senior">Senior</mat-button-toggle>
+      <mat-button-toggle value="Professional">Professional</mat-button-toggle>
+      <mat-button-toggle value="Expert">Expert</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
 
+
+  <!-- Chips with autocomplete -->
+  <mat-form-field class="w-100">
+    <mat-label>Favourite Fruits</mat-label>
+
+    <!-- auto complete -->
+    <mat-autocomplete #fruitsAutocomplete="matAutocomplete" (optionSelected)="selected($event)">
+      <mat-option *ngFor="let fruit of filteredFruits | async" [value]="fruit.name">{{fruit.name}}</mat-option>
+    </mat-autocomplete>
+
+    <!-- chips -->
+    <mat-chip-list #chipList>
+      <mat-chip *ngFor="let fruit of fruits" [removable]="true" (removed)="remove(fruit)" [value]="fruit.name">
+        {{fruit.name}}
+        <mat-icon matChipRemove>cancel</mat-icon>
+      </mat-chip>
+
+      <!-- input -->
+      <input type="text" placeholder="Type fruit name.." matInput formControlName="fruits" [matAutocomplete]="fruitsAutocomplete" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="add($event)" #fruitInput />
+    </mat-chip-list>
+  </mat-form-field>
 
   <!-- Stroked Buttons -->
   <div class="mb mt">
     <button mat-stroked-button color="primary" class="mr">Save</button>
     <button mat-stroked-button color="accent" class="mr" type="button">Cancel</button>
     <button mat-stroked-button color="warn" class="mr" type="button">Delete</button>
+  </div>
+
+  <div>
+    <mat-chip-list>
+      <mat-chip color="primary" selected (click)="onOKClick()">OK</mat-chip>
+      <mat-chip color="warn" selected>Cancel</mat-chip>
+    </mat-chip-list>
   </div>
 
   <div>

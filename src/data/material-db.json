@@ -23,5 +23,44 @@
         {"id":2, "cityName": "Cebu"},
         {"id":3, "cityName": "Macbakle"}
 
+    ],
+    "bookings":[
+        {
+            "id":1,
+            "customerName":"Smith",
+            "location":"Mexico",
+            "date": "2025-03-05"
+        },
+        {
+            "id":2,
+            "customerName":"Lodi Bels",
+            "location":"Mexico Luzon",
+            "date": "2025-03-05"
+        },
+        {
+            "id":3,
+            "customerName":"Gerard Singian",
+            "location":"Mexico",
+            "date": "2025-03-05"
+        },
+        {
+            "id":4,
+            "customerName":"Masikan Takla",
+            "location":"Mexico",
+            "date": "2025-03-05"
+        },
+        {
+            "id":5,
+            "customerName":"Mabsi",
+            "location":"Mexico",
+            "date": "2025-03-05"
+        },
+        {
+            "id":6,
+            "customerName":"madulas",
+            "location":"Mexico",
+            "date": "2025-03-05"
+        }
+
     ] 
 }

@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators, FormArray } from '@angular/forms';
 import { CountriesService } from '../../services/countries.service';
 import { CustomErrorStateMatcher } from "../../helpers/customErrorStateMatcher";
 import { CitiesService } from '../../services/cities.service';
 import { City } from '../../models/City';
-import { debounceTime, tap, switchMap } from "rxjs/operators";
+import { debounceTime, tap, switchMap, startWith, map } from "rxjs/operators";
+import { Fruit } from '../../models/Fruit';
+import { Observable } from 'rxjs';
+import { COMMA, ENTER } from "@angular/cdk/keycodes";
 
 @Component({
   selector: 'app-booking',
@@ -29,29 +32,29 @@ export class BookingComponent implements OnInit
     { id: 5, hobbyName: "Hiking" },
   ];
 
-    //date-picker
-    minDate: Date = new Date("1950-01-01");
-    maxDate: Date = new Date("2010-12-31");
-    dateHint: string = "Choose date of birth";
-    startDate: Date = new Date("2002-01-01");
+  //date-picker
+  minDate: Date = new Date("1950-01-01");
+  maxDate: Date = new Date("2010-12-31");
+  dateHint: string = "Choose date of birth";
+  startDate: Date = new Date("2002-01-01");
 
-    dateFilter(date)
+  dateFilter(date)
+  {
+    return date && date.getDay() !== 0 && date.getDay() !== 6;
+  }
+
+  onDateChange()
+  {
+    if (this.formGroup.value.dateOfBirth)
     {
-      return date && date.getDay() !== 0 && date.getDay() !== 6;
+      let date = new Date(this.formGroup.value.dateOfBirth);
+      this.dateHint = `You born on ${date.toString().substr(0, date.toString().indexOf(" "))}`;
     }
-  
-    onDateChange()
+    else
     {
-      if (this.formGroup.value.dateOfBirth)
-      {
-        let date = new Date(this.formGroup.value.dateOfBirth);
-        this.dateHint = `You born on ${date.toString().substr(0, date.toString().indexOf(" "))}`;
-      }
-      else
-      {
-        this.dateHint = "Choose date of birth";
-      }
+      this.dateHint = "Choose date of birth";
     }
+  }
 
   constructor(private countriesService: CountriesService, private citiesService: CitiesService)
   {
@@ -64,7 +67,11 @@ export class BookingComponent implements OnInit
       hobbies: new FormArray([]),
       allHobbies: new FormControl(false),
       gender: new FormControl(null, [Validators.required]),
-      dateOfBirth: new FormControl(null)
+      dateOfBirth: new FormControl(null),
+      studyPeriodStart: new FormControl(null),
+      studyPeriodEnd: new FormControl(null),
+      expertiseLevel: new FormControl(null),
+      fruits: new FormControl(null)
     });
 
     //add form controls to form array
@@ -72,6 +79,22 @@ export class BookingComponent implements OnInit
     {
       this.hobbiesFormArray.push(new FormControl(false));
     });
+
+    //chips
+    this.AllCountriesClicked();
+
+    //chips with autocomplete
+    this.filteredFruits = this.getFormControl("fruits").valueChanges.pipe(
+      startWith(''),
+      map((fruit: string | null) =>
+      {
+        return fruit ?
+          (() =>
+          {
+            return this.allFruits.filter(fruitObj => fruitObj.name.toLowerCase().indexOf(fruit.toLowerCase()) === 0);
+          })()
+          : this.allFruits.slice();
+      }));
   }
 
   //returns the form array
@@ -193,16 +216,120 @@ export class BookingComponent implements OnInit
             return "";
         }
 
-        case "gender":
-          {
-            if (errorType === "required")
-              return "Choose gender either Male or Female or Others";
-            else
-              return "";
-          }
+      case "gender":
+        {
+          if (errorType === "required")
+            return "Choose gender either Male or Female or Others";
+          else
+            return "";
+        }
 
       default: return "";
     }
   }
 
+
+  //When the user clicks on OK chip
+  onOKClick()
+  {
+    console.log("OK chip clicked");
+  }
+
+  //chips
+  All: boolean = true;
+  UK: boolean = false;
+  USA: boolean = false;
+  banks: any[] = [];
+  banksOfUK: any[] = [
+    { bankName: "HSBC", countryName: "UK" },
+    { bankName: "Royal Bank of Scotland", countryName: "UK" },
+  ];
+  banksOfUSA: any[] = [
+    { bankName: "JPMorgan Chase", countryName: "USA" },
+    { bankName: "Bank of America", countryName: "USA" },
+  ];
+
+  //All chip clicked
+  AllCountriesClicked()
+  {
+    this.banks = [...this.banksOfUK, ...this.banksOfUSA];
+    this.All = true;
+    this.UK = false;
+    this.USA = false;
+  }
+
+  //UK chip clicked
+  UKClicked()
+  {
+    this.banks = [...this.banksOfUK];
+    this.All = false;
+    this.UK = true;
+    this.USA = false;
+  }
+
+  //USA chip clicked
+  USAClicked()
+  {
+    this.banks = [...this.banksOfUSA];
+    this.All = false;
+    this.UK = false;
+    this.USA = true;
+  }
+
+  //chips with autocomplete
+  allFruits: Fruit[] = [
+    { name: "Apple" },
+    { name: "Apricot" },
+    { name: "Banana" },
+    { name: "Blueberry" },
+    { name: "Grape" },
+    { name: "Honeydew" },
+    { name: "Kiwi" },
+    { name: "Lemon" },
+    { name: "Mandarin" },
+    { name: "Mango" },
+    { name: "Nectarine" },
+    { name: "Orange" },
+    { name: "Strawberry" },
+    { name: "Watermelon" }
+  ];
+  filteredFruits: Observable<Fruit[]>;
+  fruits: Fruit[] = [
+    { name: "Orange" }
+  ];
+
+  separatorKeysCodes: number[] = [ENTER, COMMA];
+
+  @ViewChild("fruitInput") fruitInput: ElementRef<HTMLInputElement>;
+
+  //When the user presses any key like ENTER or COMMA after typing some text in the textbox
+  add(event): void
+  {
+    //Add textbox value as chip
+    if ((event.value || "").trim())
+    {
+      this.fruits.push({ name: event.value.trim() });
+      this.formGroup.patchValue({ fruits: null });
+      this.fruitInput.nativeElement.value = "";
+    }
+  }
+
+  //When the user clicks (selects) an item in the auto complete
+  selected(event)
+  {
+    this.fruits.push({ name: event.option.viewValue });
+    this.formGroup.patchValue({ fruits: null });
+    this.fruitInput.nativeElement.value = "";
+  }
+
+  //When the user clicks on Remove button for this chip
+  remove(fruit)
+  {
+    const index = this.fruits.indexOf(fruit);
+
+    if (index >= 0)
+    {
+      this.fruits.splice(index, 1);
+    }
+  }
 }
